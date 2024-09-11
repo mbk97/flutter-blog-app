@@ -109,124 +109,127 @@ class _CreateBlogState extends State<CreateBlog> {
 
   @override
   Widget build(BuildContext context) {
-    return ReusableScaffold(
-      child: Padding(
+    return Scaffold(
+      body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey, // Assign form key for validation
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: const Color(0xFFE8ECF4),
-                    width: 2.0,
-                  ),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Center(
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.arrow_back_ios,
-                      color: Color(0xFF39605B),
-                      size: 24.0,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 40),
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: const Color(0xFFE8ECF4),
+                      width: 2.0,
                     ),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Center(
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.arrow_back_ios,
+                        color: Color(0xFF39605B),
+                        size: 24.0,
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 40),
-              TextFormField(
-                cursorColor: const Color(0xFF39605B),
-                decoration: const InputDecoration(
-                  hintText: "Enter your blog Title here",
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFFF7F8F9)),
+                const SizedBox(height: 40),
+                TextFormField(
+                  cursorColor: const Color(0xFF39605B),
+                  decoration: const InputDecoration(
+                    hintText: "Enter your blog Title here",
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFFF7F8F9)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFF39605B)),
+                    ),
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF39605B)),
-                  ),
-                ),
-                autovalidateMode: AutovalidateMode
-                    .onUserInteraction, // Enable real-time validation
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a title';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  _title = value;
-                },
-              ),
-              const SizedBox(height: 40),
-              TextFormField(
-                maxLines: 10,
-                cursorColor: const Color(0xFF39605B),
-                decoration: const InputDecoration(
-                  hintText: "Enter your blog Description here",
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFFF7F8F9)),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF39605B)),
-                  ),
-                ),
-                autovalidateMode: AutovalidateMode
-                    .onUserInteraction, // Enable real-time validation
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a description';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  _description = value;
-                },
-              ),
-              const SizedBox(height: 40),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      _formKey.currentState!.save();
-                      _createBlog();
-                      // Perform the form submission logic here
+                  autovalidateMode: AutovalidateMode
+                      .onUserInteraction, // Enable real-time validation
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a title';
                     }
+                    return null;
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF39605B),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                  onSaved: (value) {
+                    _title = value;
+                  },
+                ),
+                const SizedBox(height: 40),
+                TextFormField(
+                  maxLines: 10,
+                  cursorColor: const Color(0xFF39605B),
+                  decoration: const InputDecoration(
+                    hintText: "Enter your blog Description here",
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFFF7F8F9)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFF39605B)),
                     ),
                   ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20.0, // Adjust the height
-                          width: 20.0, // Adjust the width
-                          child: CircularProgressIndicator(
-                            strokeWidth: 4.0,
-                            // backgroundColor: Colors.white,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text(
-                          "Create Blog",
-                          style: TextStyle(color: Colors.white),
-                        ),
+                  autovalidateMode: AutovalidateMode
+                      .onUserInteraction, // Enable real-time validation
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a description';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) {
+                    _description = value;
+                  },
                 ),
-              ),
-            ],
+                const SizedBox(height: 40),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        _formKey.currentState!.save();
+                        _createBlog();
+                        // Perform the form submission logic here
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF39605B),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 20.0, // Adjust the height
+                            width: 20.0, // Adjust the width
+                            child: CircularProgressIndicator(
+                              strokeWidth: 4.0,
+                              // backgroundColor: Colors.white,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text(
+                            "Create Blog",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

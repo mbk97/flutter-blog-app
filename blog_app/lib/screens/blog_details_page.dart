@@ -1,7 +1,6 @@
 import 'dart:convert'; // For jsonDecode
 import 'package:blog_app/components/reusable_scaffold.dart';
 import 'package:blog_app/screens/edit_blog.dart';
-import 'package:blog_app/screens/home.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -122,7 +121,7 @@ class _BlogDetailsPageState extends State<BlogDetailsPage> {
 
   void navigateToHomePage() {
     final route = MaterialPageRoute(
-      builder: (context) => const HomePage(),
+      builder: (context) => const ReusableScaffold(),
     );
     Navigator.push(context, route);
   }
@@ -131,8 +130,8 @@ class _BlogDetailsPageState extends State<BlogDetailsPage> {
   Widget build(BuildContext context) {
     final blog = widget.singleBlog.isNotEmpty ? widget.singleBlog : {};
 
-    return ReusableScaffold(
-      child: SingleChildScrollView(
+    return Scaffold(
+      body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(

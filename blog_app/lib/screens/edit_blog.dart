@@ -64,7 +64,7 @@ class _EditBlogPageState extends State<EditBlogPage> {
 
   void navigateToHomePage() {
     final route = MaterialPageRoute(
-      builder: (context) => const HomePage(),
+      builder: (context) => const ReusableScaffold(),
     );
     Navigator.push(context, route);
   }
@@ -109,8 +109,8 @@ class _EditBlogPageState extends State<EditBlogPage> {
 
   @override
   Widget build(BuildContext context) {
-    return ReusableScaffold(
-      child: Padding(
+    return Scaffold(
+      body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,

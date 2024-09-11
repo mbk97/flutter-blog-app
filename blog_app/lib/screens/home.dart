@@ -19,7 +19,7 @@ class _HomePageState extends State<HomePage> {
   String? userToken;
   List<dynamic>? blogsData;
   bool _isLoading = false;
-  bool _isDeleteLoading = false;
+  bool _isDeleteLoading = true;
 
   @override
   void initState() {
@@ -56,9 +56,6 @@ class _HomePageState extends State<HomePage> {
     final uri = Uri.parse(url);
     final response = await http.get(uri, headers: headers);
 
-    setState(() {
-      _isLoading = false;
-    });
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body) as Map;
       final result = data['blogs']; // Assuming 'blogs' key contains the data
@@ -166,34 +163,39 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return ReusableScaffold(
-      child: _isLoading
-          ? Padding(
-              padding: const EdgeInsets.fromLTRB(10, 70, 10, 10),
-              child: Wrap(
-                alignment: WrapAlignment.start,
-                spacing: 10, // Space between skeleton cards horizontally
-                runSpacing: 10, // Space between rows
-                children: List.generate(4, (index) {
-                  return SizedBox(
-                    width: (MediaQuery.of(context).size.width / 2) -
-                        15, // Match the card width
-                    child: Container(
-                      height: 240, // Same height as the blog card
-                      decoration: BoxDecoration(
-                        color:
-                            Colors.grey[300], // Light grey color for skeleton
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  );
-                }),
-              ),
+    return Scaffold(
+      body: _isLoading
+          ? SingleChildScrollView(
+              child: Column(children: [
+                const SizedBox(height: 50),
+                Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Wrap(
+                    alignment: WrapAlignment.start,
+                    spacing: 10, // Space between skeleton cards horizontally
+                    runSpacing: 10, // Space between rows
+                    children: List.generate(6, (index) {
+                      return SizedBox(
+                        width: (MediaQuery.of(context).size.width / 2) -
+                            15, // Match the card width
+                        child: Container(
+                          height: 180, // Same height as the blog card
+                          decoration: BoxDecoration(
+                            color: Colors
+                                .grey[300], // Light grey color for skeleton
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                ),
+              ]),
             )
           : SingleChildScrollView(
               child: Column(
                 children: [
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 30),
                   Padding(
                     padding: const EdgeInsets.all(10),
                     child: Row(
@@ -315,12 +317,7 @@ class _HomePageState extends State<HomePage> {
                                                     ),
                                                   );
                                                 } else if (result == 'delete') {
-                                                  // Perform delete action
-                                                  // ;
-                                                  //  onPressed: () {
-                                                  _showDialog(context,
-                                                      blog); // Show dialog when button is pressed
-                                                  // },
+                                                  _showDialog(context, blog);
                                                 }
                                               },
                                               itemBuilder:

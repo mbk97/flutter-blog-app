@@ -3,12 +3,12 @@ import 'package:blog_app/screens/home.dart';
 import 'package:flutter/material.dart';
 
 class ReusableScaffold extends StatefulWidget {
-  final Widget child; // Define a final variable for the child widget
+  // final Widget child; // Define a final variable for the child widget
 
   // Constructor with named parameter for the child widget
   const ReusableScaffold({
     super.key,
-    required this.child, // Mark child as required
+    // required this.child, // Mark child as required
   });
 
   @override
@@ -27,7 +27,7 @@ class _ReusableScaffoldState extends State<ReusableScaffold> {
   @override
   Widget build(BuildContext context) {
     // Define pages for navigation
-    final List<Widget> _pages = [
+    final List<Widget> pages = [
       const HomePage(), // Replace with your actual Home page widget
       const CreateBlog(), // Replace with your actual Create page widget
     ];
@@ -42,7 +42,7 @@ class _ReusableScaffoldState extends State<ReusableScaffold> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => _pages[index],
+              builder: (context) => pages[index],
             ),
           );
         },
@@ -73,7 +73,7 @@ class _ReusableScaffoldState extends State<ReusableScaffold> {
         backgroundColor: Colors.white,
         elevation: 1, // Set elevation if needed
       ),
-      body: _pages[_selectedIndex], // Display the current page
+      body: pages[_selectedIndex], // Display the current page
     );
   }
 }

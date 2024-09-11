@@ -1,6 +1,6 @@
 import 'dart:convert';
+import 'package:blog_app/components/reusable_scaffold.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:blog_app/screens/home.dart';
 import 'package:blog_app/screens/login.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -371,7 +371,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
   void navigateToHomePage() {
     final route = MaterialPageRoute(
-      builder: (context) => const HomePage(),
+      builder: (context) => const ReusableScaffold(),
     );
     Navigator.push(context, route);
   }

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:blog_app/components/reusable_scaffold.dart';
 import 'package:blog_app/screens/blog_details_page.dart';
 import 'package:blog_app/screens/create_blog.dart';
 import 'package:blog_app/screens/edit_blog.dart';

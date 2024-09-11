@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:blog_app/components/reusable_scaffold.dart';
-import 'package:blog_app/screens/home.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;

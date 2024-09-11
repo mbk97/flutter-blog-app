@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:blog_app/components/reusable_scaffold.dart';
 import 'package:blog_app/screens/register.dart';
+import 'package:blog_app/utils/shared.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -58,7 +58,7 @@ class _LoginPageState extends State<LoginPage> {
     final route = MaterialPageRoute(
       builder: (context) => const ReusableScaffold(),
     );
-    Navigator.push(context, route);
+    Navigator.pushReplacement(context, route);
   }
 
   Future<void> handleLoginUser() async {
@@ -90,14 +90,12 @@ class _LoginPageState extends State<LoginPage> {
         if (responseData.containsKey('message')) {
           showSuccessMessage(responseData['message']);
         }
-
-        SharedPreferences prefs = await SharedPreferences.getInstance();
         final userDataPayload = {
           "name": responseData['user']['name'],
           "email": responseData['user']['email'],
           "token": responseData['user']['token'],
         };
-        prefs.setString('user_details', jsonEncode({'data': userDataPayload}));
+        await SharedPrefService.saveUserData(userDataPayload);
 
         clearInput();
         navigateToHomePage();

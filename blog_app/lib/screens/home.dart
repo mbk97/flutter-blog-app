@@ -1,54 +1,45 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:blog_app/utils/shared.dart';
 import 'package:http/http.dart' as http;
 import 'package:blog_app/screens/blog_details_page.dart';
 import 'package:blog_app/screens/create_blog.dart';
 import 'package:blog_app/screens/edit_blog.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final Function() goToCreate;
+  const HomePage({
+    super.key,
+    required this.goToCreate,
+  });
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  String? userToken;
   List<dynamic>? blogsData;
   bool _isLoading = false;
-  bool _isDeleteLoading = true;
+  bool _isDeleteLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _loadUserData();
-  }
-
-  Future<void> _loadUserData() async {
-    SharedPreferences pref = await SharedPreferences.getInstance();
-    String? userData = pref.getString('user_details');
-    if (userData != null) {
-      Map<String, dynamic> newData = jsonDecode(userData);
-      setState(() {
-        userToken = newData['data']['token'];
-      });
-      await fetchAllBlogs();
-    }
+    fetchAllBlogs();
   }
 
   Future<void> fetchAllBlogs() async {
+    final userData = await SharedPrefService.getUserData();
+    if (userData == null) {
+      return;
+    }
     setState(() {
       _isLoading = true;
     });
-    if (userToken == null) {
-      return;
-    }
-
     final headers = {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer $userToken',
+      'Authorization': 'Bearer ${userData['token']}',
     };
 
     const url = 'https://blog-website-api.vercel.app/api/blog';
@@ -60,6 +51,7 @@ class _HomePageState extends State<HomePage> {
       final result = data['blogs']; // Assuming 'blogs' key contains the data
       setState(() {
         blogsData = result;
+        _isLoading = false;
       });
     } else {
       showErrorMessage('Failed to fetch');
@@ -67,13 +59,17 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _handleDelete(String id) async {
+    final userData = await SharedPrefService.getUserData();
+    if (userData == null) {
+      return;
+    }
     try {
       setState(() {
         _isDeleteLoading = true;
       });
       final headers = {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer $userToken',
+        'Authorization': 'Bearer ${userData['token']}',
       };
 
       final url = 'https://blog-website-api.vercel.app/api/blog/$id';
@@ -162,214 +158,210 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _isLoading
-          ? SingleChildScrollView(
-              child: Column(children: [
-                const SizedBox(height: 50),
+    return _isLoading
+        ? SingleChildScrollView(
+            child: Column(children: [
+              const SizedBox(height: 50),
+              Padding(
+                padding: const EdgeInsets.all(10),
+                child: Wrap(
+                  alignment: WrapAlignment.start,
+                  spacing: 10, // Space between skeleton cards horizontally
+                  runSpacing: 10, // Space between rows
+                  children: List.generate(6, (index) {
+                    return SizedBox(
+                      width: (MediaQuery.of(context).size.width / 2) -
+                          15, // Match the card width
+                      child: Container(
+                        height: 180, // Same height as the blog card
+                        decoration: BoxDecoration(
+                          color:
+                              Colors.grey[300], // Light grey color for skeleton
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ),
+            ]),
+          )
+        : SingleChildScrollView(
+            child: Column(
+              children: [
+                const SizedBox(height: 30),
+                Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Row(
+                          children: [
+                            Text(
+                              'WR',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              'I',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF39605B), // Make "I" green
+                              ),
+                            ),
+                            Text(
+                              'TE',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                backgroundColor: const Color(0xFF39605B)),
+                            onPressed: () {
+                              widget.goToCreate.call();
+                              // Navigator.push(
+                              //   context,
+                              //   MaterialPageRoute(
+                              //     builder: (context) => const CreateBlog(),
+                              //   ),
+                              // );
+                            },
+                            child: const Text(
+                              "Create Blog",
+                              style: TextStyle(color: Colors.white),
+                            ))
+                      ]),
+                ),
+                const SizedBox(height: 30),
                 Padding(
                   padding: const EdgeInsets.all(10),
                   child: Wrap(
                     alignment: WrapAlignment.start,
-                    spacing: 10, // Space between skeleton cards horizontally
+                    crossAxisAlignment: WrapCrossAlignment.start,
+                    spacing: 10, // Space between cards horizontally
                     runSpacing: 10, // Space between rows
-                    children: List.generate(6, (index) {
-                      return SizedBox(
-                        width: (MediaQuery.of(context).size.width / 2) -
-                            15, // Match the card width
-                        child: Container(
-                          height: 180, // Same height as the blog card
-                          decoration: BoxDecoration(
-                            color: Colors
-                                .grey[300], // Light grey color for skeleton
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      );
-                    }),
-                  ),
-                ),
-              ]),
-            )
-          : SingleChildScrollView(
-              child: Column(
-                children: [
-                  const SizedBox(height: 30),
-                  Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Row(
-                            children: [
-                              Text(
-                                'WR',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
+                    children: blogsData != null && blogsData!.isNotEmpty
+                        ? blogsData!.map((blog) {
+                            return SizedBox(
+                              width:
+                                  (MediaQuery.of(context).size.width / 2) - 15,
+                              child: Card(
+                                color: Colors.white,
+                                shadowColor: Colors.black,
+                                elevation: 3,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
                                 ),
-                              ),
-                              Text(
-                                'I',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF39605B), // Make "I" green
-                                ),
-                              ),
-                              Text(
-                                'TE',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  backgroundColor: const Color(0xFF39605B)),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const CreateBlog(),
-                                  ),
-                                );
-                              },
-                              child: const Text(
-                                "Create Blog",
-                                style: TextStyle(color: Colors.white),
-                              ))
-                        ]),
-                  ),
-                  const SizedBox(height: 30),
-                  Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: Wrap(
-                      alignment: WrapAlignment.start,
-                      crossAxisAlignment: WrapCrossAlignment.start,
-                      spacing: 10, // Space between cards horizontally
-                      runSpacing: 10, // Space between rows
-                      children: blogsData != null && blogsData!.isNotEmpty
-                          ? blogsData!.map((blog) {
-                              return SizedBox(
-                                width: (MediaQuery.of(context).size.width / 2) -
-                                    15,
-                                child: Card(
-                                  color: Colors.white,
-                                  shadowColor: Colors.black,
-                                  elevation: 3,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Container(
-                                    height: 240,
-                                    padding: const EdgeInsets.all(8),
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Expanded(
-                                              child: Text(
-                                                blog['title'],
-                                                style: const TextStyle(
-                                                    fontSize: 15,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                                textAlign: TextAlign.start,
-                                              ),
+                                child: Container(
+                                  height: 240,
+                                  padding: const EdgeInsets.all(8),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              blog['title'],
+                                              style: const TextStyle(
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.bold),
+                                              textAlign: TextAlign.start,
                                             ),
-                                            const SizedBox(height: 10),
-                                            PopupMenuButton<String>(
-                                              color: Colors.white,
-                                              elevation: 2,
-                                              shadowColor: Colors.black,
-                                              onSelected: (String result) {
-                                                if (result == 'read') {
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          BlogDetailsPage(
-                                                        blogId: blog['_id'],
-                                                        singleBlog: blog,
-                                                        userToken: userToken,
-                                                      ),
+                                          ),
+                                          const SizedBox(height: 10),
+                                          PopupMenuButton<String>(
+                                            color: Colors.white,
+                                            elevation: 2,
+                                            shadowColor: Colors.black,
+                                            onSelected: (String result) {
+                                              if (result == 'read') {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        BlogDetailsPage(
+                                                      blogId: blog['_id'],
+                                                      singleBlog: blog,
+                                                      // userToken: userToken,
                                                     ),
-                                                  );
-                                                } else if (result == 'edit') {
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          EditBlogPage(
-                                                        singleBlog: blog,
-                                                      ),
-                                                    ),
-                                                  );
-                                                } else if (result == 'delete') {
-                                                  _showDialog(context, blog);
-                                                }
-                                              },
-                                              itemBuilder:
-                                                  (BuildContext context) =>
-                                                      <PopupMenuEntry<String>>[
-                                                if (blog['description']
-                                                        .split(' ')
-                                                        .length >
-                                                    50)
-                                                  const PopupMenuItem<String>(
-                                                    value: 'read',
-                                                    child: Text('Read More'),
                                                   ),
+                                                );
+                                              } else if (result == 'edit') {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        EditBlogPage(
+                                                      singleBlog: blog,
+                                                    ),
+                                                  ),
+                                                );
+                                              } else if (result == 'delete') {
+                                                _showDialog(context, blog);
+                                              }
+                                            },
+                                            itemBuilder:
+                                                (BuildContext context) =>
+                                                    <PopupMenuEntry<String>>[
+                                              if (blog['description']
+                                                      .split(' ')
+                                                      .length >
+                                                  50)
                                                 const PopupMenuItem<String>(
-                                                  value: 'edit',
-                                                  child: Text('Edit'),
+                                                  value: 'read',
+                                                  child: Text('Read More'),
                                                 ),
-                                                PopupMenuItem<String>(
-                                                  value: 'delete',
-                                                  child: _isDeleteLoading
-                                                      ? const Text(
-                                                          'Deleting...',
-                                                          style: TextStyle(
-                                                              color:
-                                                                  Colors.red),
-                                                        )
-                                                      : const Text('Delete'),
-                                                )
-                                              ],
-                                              icon: const Icon(Icons
-                                                  .more_vert), // Three-dot icon
-                                            ),
-                                          ],
-                                        ),
-                                        Text(
-                                          blog['description'],
-                                          style: const TextStyle(fontSize: 14),
-                                          textAlign: TextAlign.left,
-                                          maxLines: 7,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ],
-                                    ),
+                                              const PopupMenuItem<String>(
+                                                value: 'edit',
+                                                child: Text('Edit'),
+                                              ),
+                                              PopupMenuItem<String>(
+                                                value: 'delete',
+                                                child: _isDeleteLoading
+                                                    ? const Text(
+                                                        'Deleting...',
+                                                        style: TextStyle(
+                                                            color: Colors.red),
+                                                      )
+                                                    : const Text('Delete'),
+                                              )
+                                            ],
+                                            icon: const Icon(Icons
+                                                .more_vert), // Three-dot icon
+                                          ),
+                                        ],
+                                      ),
+                                      Text(
+                                        blog['description'],
+                                        style: const TextStyle(fontSize: 14),
+                                        textAlign: TextAlign.left,
+                                        maxLines: 7,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
                                   ),
                                 ),
-                              );
-                            }).toList()
-                          : [const Text('No blogs available')],
-                    ),
-                  )
-                ],
-              ),
+                              ),
+                            );
+                          }).toList()
+                        : [const Text('No blogs available')],
+                  ),
+                )
+              ],
             ),
-    );
+          );
   }
 }

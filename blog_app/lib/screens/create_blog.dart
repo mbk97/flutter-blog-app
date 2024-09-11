@@ -1,11 +1,12 @@
 import 'dart:convert';
 import 'package:blog_app/components/reusable_scaffold.dart';
+import 'package:blog_app/utils/shared.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 class CreateBlog extends StatefulWidget {
-  const CreateBlog({super.key});
+  final Function() goBackToHome;
+  const CreateBlog({super.key, required this.goBackToHome});
 
   @override
   State<CreateBlog> createState() => _CreateBlogState();
@@ -21,18 +22,6 @@ class _CreateBlogState extends State<CreateBlog> {
   @override
   void initState() {
     super.initState();
-    _loadUserData();
-  }
-
-  Future<void> _loadUserData() async {
-    SharedPreferences pref = await SharedPreferences.getInstance();
-    String? userData = pref.getString('user_details');
-    if (userData != null) {
-      Map<String, dynamic> newData = jsonDecode(userData);
-      setState(() {
-        userToken = newData['data']['token'];
-      });
-    }
   }
 
   void showSuccessMessage(String message) {
@@ -65,6 +54,11 @@ class _CreateBlogState extends State<CreateBlog> {
   }
 
   Future<void> _createBlog() async {
+    final userData = await SharedPrefService.getUserData();
+    if (userData == null) {
+      return;
+    }
+
     try {
       setState(() {
         _isLoading = true;
@@ -79,7 +73,7 @@ class _CreateBlogState extends State<CreateBlog> {
 
       final headers = {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer $userToken',
+        'Authorization': 'Bearer ${userData['token']}',
       };
 
       const url = 'https://blog-website-api.vercel.app/api/blog';
@@ -108,8 +102,8 @@ class _CreateBlogState extends State<CreateBlog> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Padding(
+    return Material(
+      child: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey, // Assign form key for validation
@@ -136,7 +130,7 @@ class _CreateBlogState extends State<CreateBlog> {
                         size: 24.0,
                       ),
                       onPressed: () {
-                        Navigator.pop(context);
+                        widget.goBackToHome();
                       },
                     ),
                   ),

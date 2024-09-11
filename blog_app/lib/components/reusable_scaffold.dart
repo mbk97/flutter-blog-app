@@ -1,10 +1,10 @@
 import 'package:blog_app/screens/create_blog.dart';
 import 'package:blog_app/screens/home.dart';
+import 'package:blog_app/screens/login.dart';
+import 'package:blog_app/utils/shared.dart';
 import 'package:flutter/material.dart';
 
 class ReusableScaffold extends StatefulWidget {
-  // final Widget child; // Define a final variable for the child widget
-
   // Constructor with named parameter for the child widget
   const ReusableScaffold({
     super.key,
@@ -28,8 +28,17 @@ class _ReusableScaffoldState extends State<ReusableScaffold> {
   Widget build(BuildContext context) {
     // Define pages for navigation
     final List<Widget> pages = [
-      const HomePage(), // Replace with your actual Home page widget
-      const CreateBlog(), // Replace with your actual Create page widget
+      HomePage(
+        goToCreate: () {
+          _onItemTapped(1);
+        },
+      ),
+      // Replace with your actual Home page widget
+      CreateBlog(
+        goBackToHome: () {
+          _onItemTapped(0);
+        },
+      ),
     ];
 
     return Scaffold(
@@ -37,14 +46,16 @@ class _ReusableScaffoldState extends State<ReusableScaffold> {
         elevation: 4.0,
         backgroundColor: Colors.white,
         currentIndex: _selectedIndex,
-        onTap: (index) {
-          _onItemTapped(index);
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => pages[index],
-            ),
-          );
+        onTap: (index) async {
+          if (_selectedIndex != index) {
+            if (index == 2) {
+              await SharedPrefService.clearUserData();
+              Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: (_) => const LoginPage()));
+            } else {
+              _onItemTapped(index);
+            }
+          }
         },
         selectedItemColor: const Color(0xFF39605B),
         selectedFontSize: 14,
@@ -58,6 +69,10 @@ class _ReusableScaffoldState extends State<ReusableScaffold> {
           BottomNavigationBarItem(
             icon: Icon(Icons.create),
             label: 'Create',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.logout),
+            label: 'Logout',
           ),
         ],
       ),

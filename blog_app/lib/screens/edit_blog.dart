@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:blog_app/components/reusable_scaffold.dart';
+import 'package:blog_app/utils/shared.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 class EditBlogPage extends StatefulWidget {
@@ -25,18 +25,6 @@ class _EditBlogPageState extends State<EditBlogPage> {
     super.initState();
     _title = widget.singleBlog['title'] ?? '';
     _description = widget.singleBlog['description'] ?? '';
-    _loadUserData();
-  }
-
-  Future<void> _loadUserData() async {
-    SharedPreferences pref = await SharedPreferences.getInstance();
-    String? userData = pref.getString('user_details');
-    if (userData != null) {
-      Map<String, dynamic> newData = jsonDecode(userData);
-      setState(() {
-        userToken = newData['data']['token'];
-      });
-    }
   }
 
   void showSuccessMessage(String message) {
@@ -69,6 +57,10 @@ class _EditBlogPageState extends State<EditBlogPage> {
   }
 
   Future<void> _handleUpdateBlog() async {
+    final userData = await SharedPrefService.getUserData();
+    if (userData == null) {
+      return;
+    }
     try {
       setState(() {
         _isLoading = true;
@@ -81,7 +73,7 @@ class _EditBlogPageState extends State<EditBlogPage> {
 
       final headers = {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer $userToken',
+        'Authorization': 'Bearer ${userData['token']}',
       };
 
       final url = 'https://blog-website-api.vercel.app/api/blog/$id';
@@ -116,6 +108,7 @@ class _EditBlogPageState extends State<EditBlogPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const SizedBox(height: 40),
               Container(
                 width: 40,
                 height: 40,

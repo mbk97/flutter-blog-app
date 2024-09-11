@@ -1,19 +1,19 @@
 import 'dart:convert'; // For jsonDecode
 import 'package:blog_app/components/reusable_scaffold.dart';
 import 'package:blog_app/screens/edit_blog.dart';
+import 'package:blog_app/utils/shared.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class BlogDetailsPage extends StatefulWidget {
   final String blogId;
   final dynamic singleBlog;
-  final String? userToken;
 
-  BlogDetailsPage(
-      {super.key,
-      required this.blogId,
-      required this.singleBlog,
-      required this.userToken});
+  BlogDetailsPage({
+    super.key,
+    required this.blogId,
+    required this.singleBlog,
+  });
 
   @override
   _BlogDetailsPageState createState() => _BlogDetailsPageState();
@@ -23,6 +23,11 @@ class _BlogDetailsPageState extends State<BlogDetailsPage> {
   bool _isDeleteLoading = false;
 
   Future<void> _handleDelete(String id) async {
+    final userData = await SharedPrefService.getUserData();
+    if (userData == null) {
+      return;
+    }
+
     try {
       setState(() {
         _isDeleteLoading = true;
@@ -31,7 +36,7 @@ class _BlogDetailsPageState extends State<BlogDetailsPage> {
       final headers = {
         'Content-Type': 'application/json',
         'Authorization':
-            'Bearer ${widget.userToken}', // Make sure userToken is defined
+            'Bearer ${userData['token']}', // Make sure userToken is defined
       };
 
       final url = 'https://blog-website-api.vercel.app/api/blog/$id';
